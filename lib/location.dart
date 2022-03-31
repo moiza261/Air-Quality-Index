@@ -15,6 +15,7 @@ class LocationApp extends StatefulWidget {
 class _LocationAppState extends State<LocationApp> {
   String location = 'Null Press Button';
   String address = 'Search';
+  String? address2;
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
@@ -59,19 +60,19 @@ class _LocationAppState extends State<LocationApp> {
     address =
         '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
 
+    address2 = '${place.locality}';
+
     setState(() {});
   }
 
   late Position lat;
   late Position long;
   String token = 'ca79ef38e45ec5e57d30209c6406357f9783fb09';
-  late String url =
-      'https://api.waqi.info/feed/geo:${lat.latitude};${long.longitude}/?token=$token';
-
   var postJson = [];
   fetchData() async {
     try {
-      final response = await get(Uri.parse(url));
+      final response = await get(
+          Uri.parse('https://api.waqi.info/feed/$address2/?token=$token'));
       final jsonData = jsonDecode(response.body);
       print(response.body);
       setState(() {
@@ -80,60 +81,70 @@ class _LocationAppState extends State<LocationApp> {
     } catch (e) {}
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Coordinate Points',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            Text('${location}'),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              'Location',
-              style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              '${address}',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              'Air Quality Index',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Position position = await _determinePosition();
-                print(position.latitude);
+      appBar: AppBar(
+        title: const Text('Air Quality Index'),
+        backgroundColor: Colors.black,
+        centerTitle: true,
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'Coordinate Points',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Text(
+            '$location',
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          const Text(
+            'Location',
+            style: TextStyle(
+                fontSize: 22, color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Text(
+            '$address',
+            style: const TextStyle(fontSize: 18),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          const Text(
+            'Air Quality Index',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+          ),
+         
+          const SizedBox(
+            height: 10,
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Position position = await _determinePosition();
+              print(position.latitude);
 
-                location =
-                    'Lat ${position.latitude}, Long ${position.longitude}';
-                GetAddressFromLatLng(position);
-                fetchData();
-                setState(() {});
-              },
-              child: Text('Get Location'),
-            ),
-          ],
-        ),
+              location = 'Lat ${position.latitude}, Long ${position.longitude}';
+              await GetAddressFromLatLng(position);
+              await fetchData();
+              setState(() {});
+            },
+            child: const Text('Get Location'),
+          ),
+        ],
       ),
     );
   }
